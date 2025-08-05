@@ -4,7 +4,6 @@
 //modified, propagated, or distributed except according to the terms
 //contained in the LICENSE file.
 
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -118,25 +117,25 @@ void tsvVerif(InputParameter *inputParameter)
     exit(0);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
+	// Output
+	std::ofstream logFile("./outputs/log.txt");
+	std::streambuf *coutBuf = std::cout.rdbuf(); //save old buf
+	std::cout.rdbuf(logFile.rdbuf()); //redirect std::cout to log file
+
+	//tsvVerif(new InputParameter());
+
 	cout << fixed << setprecision(3);
 	string inputFileName;
 
-	if (argc == 1) {
-		inputFileName = "nvsim.cfg";
-		cout << "Default configuration file (nvsim.cfg) is loaded" << endl;
-	} else {
-		inputFileName = argv[1];
-		cout << "User-defined configuration file (" << inputFileName << ") is loaded" << endl;
-	}
+	// Load input parameters from file
+	inputFileName = argv[1];
+	cout << "User-defined configuration file (" << inputFileName << ") is loaded" << endl;
 	cout << endl;
 
 	inputParameter = new InputParameter();
 	RESTORE_SEARCH_SIZE;
 	inputParameter->ReadInputParameterFromFile(inputFileName);
-
-    //tsvVerif(inputParameter);
 
 	tech = new Technology();
 	tech->Initialize(inputParameter->processNode, inputParameter->deviceRoadmap, inputParameter);
@@ -186,8 +185,9 @@ int main(int argc, char *argv[])
 		//	temp << "_CUR";
 		temp << ".csv";
 		outputFileName = temp.str();*/
+		int startIdx = inputFileName.find_last_of("/") + 1;
         int extIdx = inputFileName.find_last_of("."); 
-        outputFileName = inputFileName.substr(0, extIdx) + ".csv";
+        outputFileName = "./outputs/" + inputFileName.substr(startIdx, extIdx-startIdx) + "_full_exp.csv";
 		outputFile.open(outputFileName.c_str(), ofstream::out | ofstream::trunc);
         if (!outputFile.is_open()) {
             cout << "Could not open file " << outputFileName << "!" << endl;
@@ -241,8 +241,7 @@ int main(int argc, char *argv[])
 
     /* Compare against results from previous cell types. */
     if (inputParameter->optimizationTarget == full_exploration 
-        && inputParameter->isPruningEnabled
-        && inputParameter->doublePrune) {
+        && inputParameter->isPruningEnabled) {
         /* Pick the best of the best over all the cell types for each x,y,z pruning triple. */
     } else if (inputParameter->optimizationTarget != full_exploration) {
         /* Pick the best of the best for each optimization target. */
@@ -309,6 +308,8 @@ int main(int argc, char *argv[])
 
 	if (outputFile.is_open())
 		outputFile.close();
+	// Restore cout
+	std::cout.rdbuf(coutBuf); //reset to standard output again
 
 	return 0;
 }
@@ -468,7 +469,7 @@ int nvsim(ofstream& outputFile, string inputFileName, long long& numSolution, Re
         //    // Require at least 32x32 subarrays.
         //    continue;
         //}
-		CALCULATE(dataBank, MemoryType::data);
+		CALCULATE(dataBank, data_type);
         numDesigns++;
 		if (!dataBank->invalid) {
 			Result tempResult;
@@ -492,7 +493,7 @@ int nvsim(ofstream& outputFile, string inputFileName, long long& numSolution, Re
 					(bool)isLocalWireLowSwing);
 			for (int i = 0; i < (int)full_exploration; i++) {
 				LOAD_GLOBAL_WIRE(bestDataResults[i]);
-				TRY_AND_UPDATE(bestDataResults[i], MemoryType::data);
+				TRY_AND_UPDATE(bestDataResults[i], data_type);
 			}
 			if (inputParameter->optimizationTarget == full_exploration && !inputParameter->isPruningEnabled) {
 				OUTPUT_TO_FILE;
@@ -505,7 +506,7 @@ int nvsim(ofstream& outputFile, string inputFileName, long long& numSolution, Re
 					(bool)isGlobalWireLowSwing);
 			for (int i = 0; i < (int)full_exploration; i++) {
 				LOAD_LOCAL_WIRE(bestDataResults[i]);
-				TRY_AND_UPDATE(bestDataResults[i], MemoryType::data);
+				TRY_AND_UPDATE(bestDataResults[i], data_type);
 			}
 			if (inputParameter->optimizationTarget == full_exploration && !inputParameter->isPruningEnabled) {
 				OUTPUT_TO_FILE;
@@ -606,7 +607,7 @@ int nvsim(ofstream& outputFile, string inputFileName, long long& numSolution, Re
 				/* To aggressive partitioning */
 				continue;
 			}
-			CALCULATE(dataBank, MemoryType::data);
+			CALCULATE(dataBank, data_type);
             numDesigns++;
 			if (!dataBank->invalid && dataBank->readLatency <= allowedDataReadLatency && dataBank->writeLatency <= allowedDataWriteLatency
 					&& dataBank->readDynamicEnergy <= allowedDataReadDynamicEnergy && dataBank->writeDynamicEnergy <= allowedDataWriteDynamicEnergy

@@ -108,7 +108,7 @@ void BankWithoutHtree::Initialize(int _numRowMat, int _numColumnMat, long long _
 	numDataBitRouteToMat = blockSize;
 
 
-	if (memoryType == MemoryType::data) { /* Data array */
+	if (memoryType == data_type) { /* Data array */
 		numDataBitRouteToMat = blockSize / numActiveMatPerColumn / numActiveMatPerRow;
 		if (numRowPerSet > associativity) {
 			/* There is no enough ways to distribute into multiple rows */
@@ -183,14 +183,14 @@ void BankWithoutHtree::Initialize(int _numRowMat, int _numColumnMat, long long _
 		if (cell->memCellType == SRAM) {
 			/* SRAM, DRAM, and eDRAM all use voltage sensing */
 			voltageSense = true;
-		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
+		} else if (cell->memCellType == memristor) {
 			voltageSense = cell->readMode;
 		} else {/* NAND flash */
 			// TO-DO
 		}
 
 		int numSenseAmp;
-		if (memoryType == MemoryType::data)
+		if (memoryType == data_type)
 			numSenseAmp = blockSize;
 		else
 			numSenseAmp = blockSize * associativity;
@@ -257,7 +257,7 @@ void BankWithoutHtree::CalculateArea() {
 		}
 
 		/* Determine if the aspect ratio meets the constraint */
-		if (memoryType == MemoryType::data)
+		if (memoryType == data_type)
 			if (height / width > CONSTRAINT_ASPECT_RATIO_BANK || width / height > CONSTRAINT_ASPECT_RATIO_BANK) {
 				/* illegal */
 				invalid = true;
@@ -379,7 +379,7 @@ void BankWithoutHtree::CalculateLatencyAndPower() {
 						readDynamicEnergy += capGlobalBitline * vpre * vpre * numWay;
 						writeDynamicEnergy += capGlobalBitline * vpre * vpre * numDataBitRouteToMat;
 					}
-				} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
+				} else if (cell->memCellType == memristor) {
 					double vWrite = MAX(fabs(cell->resetVoltage), fabs(cell->setVoltage));
 					double tau, latencyOff, latencyOn;
 					double vPre = mat.subarray.voltagePrecharge;

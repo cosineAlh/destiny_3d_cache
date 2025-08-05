@@ -21,7 +21,7 @@ OUTDIR := obj
 SRC := $(wildcard *.cpp)
 INC := 
 DBG :=
-OBJ := $(patsubst %.cpp,$(OUTDIR)/%.o,$(notdir $(SRC)))
+OBJ := $(patsubst %.cpp, $(OUTDIR)/%.o, $(notdir $(SRC)))
 DEP := Makefile.dep
 
 # file disambiguity is achieved via the .PHONY directive
@@ -50,6 +50,6 @@ depend $(DEP):
 	@$(RM) $(DEP)
 	@$(CXX) -E -MM $(INC) $(SRC) >> $(DEP)
 
-ifeq (,$(findstring clean,$(MAKECMDGOALS)))
+ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(DEP)
 endif

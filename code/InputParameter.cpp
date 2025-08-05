@@ -97,7 +97,6 @@ InputParameter::InputParameter() {
 
     fileMemCell.clear();
 
-    doublePrune = false;  // TODO
     printAllOptimals = false;
     allowDifferentTagTech = false;
 

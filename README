@@ -82,59 +82,41 @@ DESTINY must be compiled with a user-specified configuration files, as follows:
 -------------------------------------------------------
 ###  The meaning and possible values of parameters added in DESTINY
 
--StackedDieCount - Number of dies over which the memory is distributed
+- StackedDieCount: Number of dies over which the memory is distributed
 
--PartitionGranularity - 
-0: Coarse granularity: This assumes that address, control, and data signals are 
-broadcast to all stacked dies and decoded on the destination die. 
-1: Fine granularity: This assumes that address signals are pre-decoded on a 
-separate logic layer and the undecoded address signals are broadcast to all 
-stacked dies. The control and data are still shared. 
-Note that the total number of dies in fine granularity is StackedDieCount + 1
+- PartitionGranularity
+  - 0: Coarse granularity: This assumes that address, control, and data signals are broadcast to all stacked dies and decoded on the destination die.
+  - 1: Fine granularity: This assumes that address signals are pre-decoded on a separate logic layer and the undecoded address signals are broadcast to all stacked dies. The control and data are still shared.
+  - Note that the total number of dies in fine granularity is StackedDieCount + 1
 
--LocalTSVProjection: 
-0: Use aggressive TSV projection from ITRS for local TSVs.
-1: Use conservative values from industry measurements for local TSVs
+- LocalTSVProjection:
+  - 0: Use aggressive TSV projection from ITRS for local TSVs.
+  - 1: Use conservative values from industry measurements for local TSVs.
+  - Local TSVs are used in fine granularity partitioning to route pre-decoded signals.
 
-Local TSVs are used in fine granularity partitioning to route pre-decoded signals
+- GlobalTSVProjection:
+  - 0: Use aggressive TSV projection from ITRS for global TSVs.
+  - 1: Use conservative values from industry measurements for global TSVs.
+  - Global TSVs are used in both fine and coarse granularity partitioning to route broadcast signals (e.g., data and control signals).
 
+- TSVRedundancy: Any floating point value from 1.0 or higher (reasonably, about 2.0 is the maximum). ((TSVRedundancy - 1)*100) is the percentage of extra TSVs assumed for each TSV cluster for fault tolerance / TSV yield issues.
 
--GlobalTSVProjection: 
-0: Use aggressive TSV projection from ITRS for global TSVs
-1: Use conservative values from industry measurements for global TSVs
+- MonolithicStackCount: Integer value e.g., 1, 2, 4. This is the number of memory layers on the *same* die which are monolithically stacked.
 
-Global TSVs are used in both fine and coarse granularity partitioning to 
-route broadcast signals (e.g., data and control signals)
+- Other important parameters added:
+  - AllowDifferenceTagTech: Allow the tag array of a cache to be a different technology than the data array (e.g., SRAM tag array with STT-RAM data array).
+  - MemoryCellInputFile: This parameter can be specified multiple times to consider multiple different technologies in the same simulation run.
+  - PrintAllOptimals: Print the optimal design for each optimization target (can be used to find the best of multiple technology inputs).
 
+  - ForceBank3D: Dimensions of each bank in terms of number of Mats in each direction.
+  - ForceBank3DA: Same as ForceBank3D, except forcing the number of active Mats is not required
+  - ForceBankA: Same as ForceBank in NVSim, except forcing the number of active Mats is not required.
+  - ForceMatA: Same as ForceMat in NVSim, except forcing the number of active Subarrays is not required.
 
--TSVRedundancy: Any floating point value from 1.0 or higher (reasonably, about 
-2.0 is the maximum). ((TSVRedundancy - 1)*100) is the percentage of extra TSVs 
-assumed for each TSV cluster for fault tolerance / TSV yield issues.
+- Making output concise or detailed:
+  - PrintLevel: 0 -> does NOT produce CACHE DATA ARRAY DETAILS and CACHE TAG ARRAY DETAILS.
+  - PrintLevel: 1 -> produces CACHE DATA ARRAY DETAILS and CACHE TAG ARRAY DETAILS.
 
-
--MonolithicStackCount: Integer value e.g., 1, 2, 4. This is the number of memory 
-layers on the *same* die which are monolithically stacked.
-
-Other important parameters added:
-
--AllowDifferenceTagTech: Allow the tag array of a cache to be a different 
-technology than the data array (e.g., SRAM tag array with STT-RAM data array).
-
--MemoryCellInputFile: This parameter can be specified multiple times 
-to consider multiple different technologies in the same simulation run.
-
--PrintAllOptimals: Print the optimal design for each optimization 
-target (can be used to find the best of multiple technology inputs).
-
--ForceBank3D: Dimensions of each bank in terms of number of Mats in each direction.
--ForceBank3DA: Same as ForceBank3D, except forcing the number of active Mats is not required
--ForceBankA: Same as ForceBank in NVSim, except forcing the number of active Mats is not required.
--ForceMatA: Same as ForceMat in NVSim, except forcing the number of active Subarrays is not required.
-
-Making output concise or detailed:
--PrintLevel: 0 -> does NOT produce CACHE DATA ARRAY DETAILS and CACHE TAG ARRAY DETAILS
-Or
--PrintLevel: 1 -> produces CACHE DATA ARRAY DETAILS and CACHE TAG ARRAY DETAILS 
 For more details on this, see Result.cpp file.
 
 -------------------------------------------------------

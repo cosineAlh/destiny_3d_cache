@@ -381,8 +381,7 @@ void Result::print(int indent) {
 	if (bank->mat.memoryType == tag && bank->mat.internalSenseAmp)
 		cout << string(indent, ' ') << "    |--- Comparator Latency  = " << TO_SECOND(bank->mat.comparator.readLatency) << endl;
 
-	if (cell->memCellType == PCRAM || cell->memCellType == FBRAM ||
-			(cell->memCellType == memristor && (cell->accessType == CMOS_access || cell->accessType == BJT_access))) {
+	if ((cell->memCellType == memristor && (cell->accessType == CMOS_access))) {
 		cout << string(indent, ' ') << " - RESET Latency = " << TO_SECOND(bank->resetLatency) << endl;
         if (bank->stackedDieCount > 1 && bank->partitionGranularity == 0) {
             cout << string(indent, ' ') << " |--- TSV Latency    = " << TO_SECOND(bank->tsvArray.resetLatency * (bank->stackedDieCount-1)) << endl;
@@ -500,7 +499,7 @@ void Result::print(int indent) {
 	cout << string(indent, ' ') << "       |--- Mux Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.bitlineMuxDecoder.readDynamicEnergy
 													+ bank->mat.subarray.senseAmpMuxLev1Decoder.readDynamicEnergy
 													+ bank->mat.subarray.senseAmpMuxLev2Decoder.readDynamicEnergy) << endl;
-	if (cell->memCellType == PCRAM || cell->memCellType == FBRAM || cell->memCellType == MRAM || cell->memCellType == memristor ) {
+	if (cell->memCellType == memristor ) {
 		cout << string(indent, ' ') << "       |--- Bitline & Cell Read Energy = " << TO_JOULE(bank->mat.subarray.cellReadEnergy) << endl;
 	}
 	if (inputParameter->internalSensing)
@@ -510,8 +509,7 @@ void Result::print(int indent) {
 													+ bank->mat.subarray.senseAmpMuxLev2.readDynamicEnergy) << endl;
 	cout << string(indent, ' ') << "       |--- Precharge Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.precharger.readDynamicEnergy) << endl;
 
-	if (cell->memCellType == PCRAM || cell->memCellType == FBRAM ||
-			(cell->memCellType == memristor && (cell->accessType == CMOS_access || cell->accessType == BJT_access))) {
+	if ((cell->memCellType == memristor && cell->accessType == CMOS_access)) {
 		cout << string(indent, ' ') << " - RESET Dynamic Energy = " << TO_JOULE(bank->resetDynamicEnergy) << endl;
         if (bank->stackedDieCount > 1 && bank->partitionGranularity == 0) {
             cout << string(indent, ' ') << " |--- TSV Dynamic Energy    = " << TO_JOULE(bank->tsvArray.resetDynamicEnergy * (bank->stackedDieCount-1) * bank->tsvArray.numAccessBits) << endl;
@@ -660,7 +658,7 @@ void Result::print(int indent) {
 
 
 void Result::printAsCache(Result &tagResult, CacheAccessMode cacheAccessMode) {
-	if (bank->memoryType != MemoryType::data || tagResult.bank->memoryType != tag) {
+	if (bank->memoryType != data_type || tagResult.bank->memoryType != tag) {
 		cout << "This is not a valid cache configuration." << endl;
 		return;
 	} else {
@@ -940,7 +938,7 @@ void Result::printToCsvFile(ofstream &outputFile) {
 }
 
 void Result::printAsCacheToCsvFile(Result &tagResult, CacheAccessMode cacheAccessMode, ofstream &outputFile) {
-	if (bank->memoryType != MemoryType::data || tagResult.bank->memoryType != tag) {
+	if (bank->memoryType != data_type || tagResult.bank->memoryType != tag) {
 		cout << "This is not a valid cache configuration." << endl;
 		return;
 	} else {

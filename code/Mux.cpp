@@ -27,14 +27,12 @@ void Mux::Initialize(int _numInput, long long _numMux, double _capLoad, double _
 		cout << "[Mux] Warning: Already initialized!" << endl;
 
 	numInput = _numInput;
-	numMux = _numMux;
-	capLoad = _capLoad;
-	capInputNextStage = _capInputNextStage;
+	numMux = _numMux; capLoad = _capLoad; capInputNextStage = _capInputNextStage;
 	minDriverCurrent = _minDriverCurrent;
 
 	if ((numInput > 1) && (numMux > 0 )) {
 		double minNMOSWidth = minDriverCurrent / tech->currentOnNmos[inputParameter->temperature - 300];
-		if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor) {
+		if (cell->memCellType == memristor) {
 			/* Mux resistance should be small enough for voltage dividing */
 			double maxResNMOSPassTransistor = cell->resistanceOn * IR_DROP_TOLERANCE;
 	    	widthNMOSPassTransistor = CalculateOnResistance(tech->featureSize, NMOS, inputParameter->temperature, *tech)

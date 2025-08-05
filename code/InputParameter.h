@@ -113,7 +113,6 @@ public:
     int maxStackLayer;
     bool forcedStackLayers;
 
-    bool doublePrune;
     bool printAllOptimals;
     bool allowDifferentTagTech;
 

@@ -14,7 +14,7 @@
 
 MemCell::MemCell() {
 	// TODO Auto-generated constructor stub
-	memCellType         = PCRAM;
+	memCellType         = SRAM;
 	area                = 0;
 	aspectRatio         = 0;
 	resistanceOn        = 0;
@@ -88,16 +88,8 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 				memCellType = DRAM;
 			else if (!strcmp(tmp, "eDRAM"))
 				memCellType = eDRAM;
-			else if (!strcmp(tmp, "MRAM"))
-				memCellType = MRAM;
-			else if (!strcmp(tmp, "PCRAM"))
-				memCellType = PCRAM;
-			else if (!strcmp(tmp, "FBRAM"))
-				memCellType = FBRAM;
 			else if (!strcmp(tmp, "memristor"))
 				memCellType = memristor;
-			else if (!strcmp(tmp, "SLCNAND"))
-				memCellType = SLCNAND;
 			else
 				memCellType = MLCNAND;
 			continue;
@@ -444,42 +436,8 @@ void MemCell::ApplyPVT() {
 
 void MemCell::CellScaling(int _targetProcessNode) {
 	if ((processNode > 0) && (processNode != _targetProcessNode)) {
-		double scalingFactor = (double)processNode / _targetProcessNode;
-		if (memCellType == PCRAM) {
-			resistanceOn *= scalingFactor;
-			resistanceOff *= scalingFactor;
-			if (!setMode) {
-				setCurrent /= scalingFactor;
-			} else {
-				setVoltage *= 1;
-			}
-			if (!resetMode) {
-				resetCurrent /= scalingFactor;
-			} else {
-				resetVoltage *= 1;
-			}
-			if (accessType == diode_access) {
-				capacitanceOn /= scalingFactor; //TO-DO
-				capacitanceOff /= scalingFactor; //TO-DO
-			}
-		} else if (memCellType == MRAM){ //TO-DO: MRAM
-			resistanceOn *= scalingFactor * scalingFactor;
-			resistanceOff *= scalingFactor * scalingFactor;
-			if (!setMode) {
-				setCurrent /= scalingFactor;
-			} else {
-				setVoltage *= scalingFactor;
-			}
-			if (!resetMode) {
-				resetCurrent /= scalingFactor;
-			} else {
-				resetVoltage *= scalingFactor;
-			}
-			if (accessType == diode_access) {
-				capacitanceOn /= scalingFactor; //TO-DO
-				capacitanceOff /= scalingFactor; //TO-DO
-			}
-		} else if (memCellType == memristor) { //TO-DO: memristor
+		// double scalingFactor = (double)processNode / _targetProcessNode;
+		if (memCellType == memristor) { //TO-DO: memristor
 
 		} else { //TO-DO: other RAMs
 
@@ -517,10 +475,6 @@ void MemCell::CalculateWriteEnergy() {
 					resetEnergy = fabs(resetVoltage) * (fabs(resetVoltage) - voltageDropAccessDevice) / resistanceOnAtResetVoltage * resetPulse;
 				else
 					resetEnergy = fabs(resetVoltage) * (fabs(resetVoltage) - voltageDropAccessDevice) / resistanceOn * resetPulse;
-			else if (memCellType == PCRAM)
-				resetEnergy = fabs(resetVoltage) * (fabs(resetVoltage) - voltageDropAccessDevice) / resistanceOn * resetPulse;	// PCM cells shows low resistance during most time of the switching
-			else if (memCellType == FBRAM)
-				resetEnergy = fabs(resetVoltage) * fabs(resetCurrent) * resetPulse;
 			else
 				resetEnergy = fabs(resetVoltage) * (fabs(resetVoltage) - voltageDropAccessDevice) / resistanceOn * resetPulse;
 		} else {
@@ -529,19 +483,6 @@ void MemCell::CalculateWriteEnergy() {
 			} else {
 				resetEnergy = fabs(resetVoltage) * fabs(resetCurrent) * resetPulse;
 			}
-			/* previous model seems to be problematic
-			if (memCellType == memristor)
-				if (accessType == none_access)
-					resetEnergy = resetCurrent * (resetCurrent * resistanceOffAtResetVoltage + voltageDropAccessDevice) * resetPulse;
-				else
-					resetEnergy = resetCurrent * (resetCurrent * resistanceOff + voltageDropAccessDevice) * resetPulse;
-			else if (memCellType == PCRAM)
-				resetEnergy = resetCurrent * (resetCurrent * resistanceOn + voltageDropAccessDevice) * resetPulse;		// PCM cells shows low resistance during most time of the switching
-			else if (memCellType == FBRAM)
-				resetEnergy = fabs(resetVoltage) * fabs(resetCurrent) * resetPulse;
-			else
-				resetEnergy = resetCurrent * (resetCurrent * resistanceOff + voltageDropAccessDevice) * resetPulse;
-		    */
 		}
 	}
 	if (setEnergy == 0) {
@@ -551,10 +492,6 @@ void MemCell::CalculateWriteEnergy() {
 					setEnergy = fabs(setVoltage) * (fabs(setVoltage) - voltageDropAccessDevice) / resistanceOnAtSetVoltage * setPulse;
 				else
 					setEnergy = fabs(setVoltage) * (fabs(setVoltage) - voltageDropAccessDevice) / resistanceOn * setPulse;
-			else if (memCellType == PCRAM)
-				setEnergy = fabs(setVoltage) * (fabs(setVoltage) - voltageDropAccessDevice) / resistanceOn * setPulse;			// PCM cells shows low resistance during most time of the switching
-			else if (memCellType == FBRAM)
-				setEnergy = fabs(setVoltage) * fabs(setCurrent) * setPulse;
 			else
 				setEnergy = fabs(setVoltage) * (fabs(setVoltage) - voltageDropAccessDevice) / resistanceOn * setPulse;
 		} else {
@@ -563,19 +500,6 @@ void MemCell::CalculateWriteEnergy() {
 			} else {
 				setEnergy = fabs(setVoltage) * fabs(setCurrent) * setPulse;
 			}
-			/* previous model seems to be problematic
-			if (memCellType == memristor)
-				if (accessType == none_access)
-					setEnergy = setCurrent * (setCurrent * resistanceOffAtSetVoltage + voltageDropAccessDevice) * setPulse;
-				else
-					setEnergy = setCurrent * (setCurrent * resistanceOff + voltageDropAccessDevice) * setPulse;
-			else if (memCellType == PCRAM)
-				setEnergy = setCurrent * (setCurrent * resistanceOn + voltageDropAccessDevice) * setPulse;		// PCM cells shows low resistance during most time of the switching
-			else if (memCellType == FBRAM)
-				setEnergy = fabs(setVoltage) * fabs(setCurrent) * setPulse;
-			else
-				setEnergy = setCurrent * (setCurrent * resistanceOff + voltageDropAccessDevice) * setPulse;
-			*/
 		}
 	}
 }
@@ -614,23 +538,8 @@ void MemCell::PrintCell(int indent)
 	case eDRAM:
 		cout << string(indent, ' ') << "Memory Cell: Embedded DRAM" << endl;
 		break;
-	case MRAM:
-		cout << string(indent, ' ') << "Memory Cell: MRAM (Magnetoresistive)" << endl;
-		break;
-	case PCRAM:
-		cout << string(indent, ' ') << "Memory Cell: PCRAM (Phase-Change)" << endl;
-		break;
 	case memristor:
 		cout << string(indent, ' ') << "Memory Cell: RRAM (Memristor)" << endl;
-		break;
-	case FBRAM:
-		cout << string(indent, ' ') << "Memory Cell: FBRAM (Floating Body)" <<endl;
-		break;
-	case SLCNAND:
-		cout << string(indent, ' ') << "Memory Cell: Single-Level Cell NAND Flash" << endl;
-		break;
-	case MLCNAND:
-		cout << string(indent, ' ') << "Memory Cell: Multi-Level Cell NAND Flash" << endl;
 		break;
 	default:
 		cout << string(indent, ' ') << "Memory Cell: Unknown" << endl;
@@ -638,7 +547,7 @@ void MemCell::PrintCell(int indent)
 	cout << string(indent, ' ') << "Cell Area (F^2)    : " << area << " (" << heightInFeatureSize << "Fx" << widthInFeatureSize << "F)" << endl;
 	cout << string(indent, ' ') << "Cell Aspect Ratio  : " << aspectRatio << endl;
 
-	if (memCellType == PCRAM || memCellType == MRAM || memCellType == memristor || memCellType == FBRAM) {
+	if (memCellType == memristor) {
 		if (resistanceOn < 1e3 )
 			cout << string(indent, ' ') << "Cell Turned-On Resistance : " << resistanceOn << "ohm" << endl;
 		else if (resistanceOn < 1e6)
